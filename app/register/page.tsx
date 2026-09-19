@@ -16,9 +16,7 @@ export default function RegisterPage() {
     desa: "",
   });
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
     setForm((prev) => ({
@@ -36,29 +34,24 @@ export default function RegisterPage() {
   return (
     <main className="min-h-screen bg-white">
       <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
-
         {/* ================= LEFT ================= */}
         <section className="relative flex min-h-screen flex-col justify-between bg-[#1759BD] px-8 py-8 text-white lg:px-14 lg:py-12">
-
           {/* Logo */}
           <div>
             <div className="flex items-center gap-3">
-                <Image 
-                  src="/Frame.png"
-                  alt="Next.js logo"
-                  width={50}
-                  height={50}
-                />
+              <Image
+                src="/Frame.png"
+                alt="Next.js logo"
+                width={50}
+                height={50}
+              />
 
-              <span className="text-xl font-bold tracking-tight">
-                MEDLINK
-              </span>
+              <span className="text-xl font-bold tracking-tight">MEDLINK</span>
             </div>
           </div>
 
           {/* Hero */}
           <div className="max-w-xl">
-
             <h1 className="text-4xl font-bold leading-[1.1] tracking-tight lg:text-[40px]">
               Jaringan Pengiriman
               <br />
@@ -66,21 +59,18 @@ export default function RegisterPage() {
             </h1>
 
             <p className="mt-5 max-w-lg text-sm leading-6 text-white/90">
-              Menyediakan akses terverifikasi bagi institusi layanan
-              kesehatan untuk menyiarkan peringatan pengiriman darah
-              darurat secara instan kepada para pendonor regional
-              yang memenuhi syarat.
+              Menyediakan akses terverifikasi bagi institusi layanan kesehatan
+              untuk menyiarkan peringatan pengiriman darah darurat secara instan
+              kepada para pendonor regional yang memenuhi syarat.
             </p>
 
             {/* Features */}
             <div className="mt-6 space-y-4">
-
               <Feature text="Pengendalian Akses untuk Verifikasi Kode Fasilitas Pelayanan Kesehatan" />
 
               <Feature text="Data diawasi oleh Pemerintah" />
 
               <Feature text="Algoritma pencocokan hiperlocal instan untuk peringatan kritis" />
-
             </div>
           </div>
 
@@ -94,9 +84,7 @@ export default function RegisterPage() {
 
         {/* ================= RIGHT ================= */}
         <section className="flex min-h-screen items-center justify-center bg-white px-6 py-10 lg:px-12">
-
           <div className="w-full max-w-[430px]">
-
             {/* Header */}
             <div className="mb-8">
               <h2 className="text-2xl font-bold tracking-tight text-[#111827]">
@@ -109,11 +97,7 @@ export default function RegisterPage() {
             </div>
 
             {/* Form */}
-            <form
-              onSubmit={handleSubmit}
-              className="space-y-4"
-            >
-
+            <form onSubmit={handleSubmit} className="space-y-4">
               {/* Name */}
               <InputField
                 label="Name"
@@ -191,7 +175,6 @@ export default function RegisterPage() {
               >
                 Verifikasi
               </button>
-
             </form>
 
             {/* Login */}
@@ -204,7 +187,6 @@ export default function RegisterPage() {
                 Log in
               </a>
             </div>
-
           </div>
         </section>
       </div>
@@ -212,9 +194,7 @@ export default function RegisterPage() {
       {/* ================= MODAL ================= */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-5">
-
           <div className="w-full max-w-[340px] rounded-xl bg-white p-6 shadow-2xl">
-
             {/* Icon */}
             <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
               <svg
@@ -248,8 +228,8 @@ export default function RegisterPage() {
 
             {/* Description */}
             <p className="mt-2 text-xs leading-5 text-gray-500">
-              Pendaftaran Anda sedang menunggu verifikasi manual.
-              Perkiraan waktu pemrosesan: 24 jam.
+              Pendaftaran Anda sedang menunggu verifikasi manual. Perkiraan
+              waktu pemrosesan: 24 jam.
             </p>
 
             {/* Close */}
@@ -259,7 +239,6 @@ export default function RegisterPage() {
             >
               Tutup
             </button>
-
           </div>
         </div>
       )}
@@ -318,14 +297,8 @@ function InputField({
 function Feature({ text }: { text: string }) {
   return (
     <div className="flex items-center gap-3">
-
       <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-white/80">
-        <svg
-          width="8"
-          height="8"
-          viewBox="0 0 24 24"
-          fill="none"
-        >
+        <svg width="8" height="8" viewBox="0 0 24 24" fill="none">
           <path
             d="M5 12L10 17L19 7"
             stroke="white"
@@ -336,10 +309,7 @@ function Feature({ text }: { text: string }) {
         </svg>
       </div>
 
-      <span className="text-xs text-white/95">
-        {text}
-      </span>
-
+      <span className="text-xs text-white/95">{text}</span>
     </div>
   );
 }
