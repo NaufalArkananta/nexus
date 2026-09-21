@@ -28,37 +28,40 @@ export default function LoginPage() {
     <main className="min-h-screen bg-white">
       <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
         {/* ================= LEFT ================= */}
-        <section className="relative flex min-h-screen flex-col justify-between bg-[#1759BD] px-8 py-8 text-white lg:px-14 lg:py-12">
+        <section className="relative flex flex-col justify-between gap-10 bg-[#1759BD] px-6 py-10 text-white sm:px-10 sm:py-12 lg:gap-0 lg:px-14 lg:py-12">
           {/* Logo */}
           <div>
             <div className="flex items-center gap-3">
               <Image
                 src="/Frame.png"
                 alt="Next.js logo"
-                width={50}
-                height={50}
+                width={40}
+                height={40}
+                className="h-9 w-9 sm:h-[50px] sm:w-[50px]"
               />
 
-              <span className="text-xl font-bold tracking-tight">MEDLINK</span>
+              <span className="text-lg font-bold tracking-tight sm:text-xl">
+                MEDLINK
+              </span>
             </div>
           </div>
 
           {/* Hero */}
           <div className="max-w-xl">
-            <h1 className="text-4xl font-bold leading-[1.1] tracking-tight lg:text-[40px]">
+            <h1 className="text-3xl font-bold leading-[1.15] tracking-tight sm:text-4xl lg:text-[40px] lg:leading-[1.1]">
               Jaringan Pengiriman
               <br />
               Darurat Darah Hiperlokal
             </h1>
 
-            <p className="mt-5 max-w-lg text-sm leading-6 text-white/90">
+            <p className="mt-4 max-w-lg text-sm leading-6 text-white/90 sm:mt-5">
               Menyediakan akses terverifikasi bagi institusi layanan kesehatan
               untuk menyiarkan peringatan pengiriman darah darurat secara instan
               kepada para pendonor regional yang memenuhi syarat.
             </p>
 
             {/* Features */}
-            <div className="mt-6 space-y-4">
+            <div className="mt-6 space-y-3 sm:space-y-4">
               <Feature text="Pengendalian Akses untuk Verifikasi Kode Fasilitas Pelayanan Kesehatan" />
 
               <Feature text="Data diawasi oleh Pemerintah" />
@@ -76,7 +79,7 @@ export default function LoginPage() {
         </section>
 
         {/* ================= RIGHT ================= */}
-        <section className="flex min-h-screen items-center justify-center bg-white px-6 py-10 lg:px-12">
+        <section className="flex items-center justify-center bg-white px-6 py-10 sm:px-10 lg:px-12">
           <div className="w-full max-w-[430px]">
             {/* Header */}
             <div className="mb-8">
@@ -144,7 +147,7 @@ export default function LoginPage() {
               {/* Google */}
               <button
                 type="button"
-                className="flex w-20 items-center justify-center rounded-3xl border border-gray-300 bg-white py-2.5 text-gray-700 transition hover:bg-gray-50"
+                className="flex w-1/2 max-w-[140px] items-center justify-center rounded-3xl border border-gray-300 bg-white py-2.5 text-gray-700 transition hover:bg-gray-50"
               >
                 <GoogleIcon />
               </button>
@@ -152,7 +155,7 @@ export default function LoginPage() {
               {/* Apple */}
               <button
                 type="button"
-                className="flex w-20 items-center justify-center rounded-3xl border border-gray-300 bg-white py-2.5 text-gray-700 transition hover:bg-gray-50"
+                className="flex w-1/2 max-w-[140px] items-center justify-center rounded-3xl border border-gray-300 bg-white py-2.5 text-gray-700 transition hover:bg-gray-50"
               >
                 <AppleIcon />
               </button>

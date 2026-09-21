@@ -1,34 +1,171 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
+import RegionInput from "./RegionInput";
+import { axiosInstance } from "@/lib/axios";
+import { useRouter } from "next/navigation";
+
+type Region = {
+  code: string;
+  name: string;
+};
 
 export default function RegisterPage() {
   const [showModal, setShowModal] = useState(false);
 
-  const [form, setForm] = useState({
-    nama: "",
-    noHp: "",
-    email: "",
-    password: "",
-    kotaKabupaten: "",
-    kecamatan: "",
-    desa: "",
-  });
+  const [regencies, setRegencies] = useState<Region[]>([]);
+  const [districts, setDistricts] = useState<Region[]>([]);
+  const [villages, setVillages] = useState<Region[]>([]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  const [loadingRegencies, setLoadingRegencies] = useState(false);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
+  const [loadingVillages, setLoadingVillages] = useState(false);
 
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  const [selectedRegency, setSelectedRegency] = useState<Region | null>(null);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const [selectedDistrict, setSelectedDistrict] = useState<Region | null>(null);
+
+  const [provinces, setProvinces] = useState<Region[]>([]);
+  const [selectedProvince, setSelectedProvince] = useState<Region | null>(null);
+
+  const [nama, setNama] = useState("");
+  const [noHp, setNoHp] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [provinceSearch, setProvinceSearch] = useState("");
+  const [kotaKabupaten, setKotaKabupaten] = useState("");
+  const [kecamatan, setKecamatan] = useState("");
+  const [desa, setDesa] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    const fetchProvinces = async () => {
+      try {
+        const response = await axiosInstance.get("/api/wilayah/provinces");
+
+        setProvinces(response.data.data);
+      } catch (error) {
+        console.error("Gagal mengambil provinsi:", error);
+      }
+    };
+
+    fetchProvinces();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedProvince) {
+      setRegencies([]);
+      return;
+    }
+
+    const fetchRegencies = async () => {
+      try {
+        setLoadingRegencies(true);
+
+        const response = await axiosInstance.get(
+          `/api/wilayah/regencies/${selectedProvince.code}`,
+        );
+
+        setRegencies(response.data.data);
+      } catch (error) {
+        console.error("Gagal mengambil kabupaten/kota:", error);
+      } finally {
+        setLoadingRegencies(false);
+      }
+    };
+
+    fetchRegencies();
+  }, [selectedProvince]);
+
+  useEffect(() => {
+    if (!selectedRegency) {
+      setDistricts([]);
+      return;
+    }
+
+    const fetchDistricts = async () => {
+      try {
+        setLoadingDistricts(true);
+
+        const response = await axiosInstance.get(
+          `/api/wilayah/districts/${selectedRegency.code}`,
+        );
+
+        setDistricts(response.data.data);
+      } catch (error) {
+        console.error("Gagal mengambil kecamatan:", error);
+      } finally {
+        setLoadingDistricts(false);
+      }
+    };
+
+    fetchDistricts();
+  }, [selectedRegency]);
+
+  useEffect(() => {
+    if (!selectedDistrict) {
+      setVillages([]);
+      return;
+    }
+
+    const fetchVillages = async () => {
+      try {
+        setLoadingVillages(true);
+
+        const response = await axiosInstance.get(
+          `/api/wilayah/villages/${selectedDistrict.code}`,
+        );
+
+        setVillages(response.data.data);
+      } catch (error) {
+        console.error("Gagal mengambil desa:", error);
+      } finally {
+        setLoadingVillages(false);
+      }
+    };
+
+    fetchVillages();
+  }, [selectedDistrict]);
+
+  const router = useRouter();
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    setShowModal(true);
+    if (isLoading) return;
+
+    setIsLoading(true);
+
+    try {
+      const payload = {
+        nama,
+        noHp,
+        email,
+        password,
+        provinsi: selectedProvince?.name,
+        kabupatenKota: kotaKabupaten,
+        kecamatan,
+        desaKelurahan: desa,
+      };
+
+      const response = await axiosInstance.post("/api/auth/register", payload);
+
+      setTimeout(() => {
+        router.replace("/login");
+      }, 1200);
+    } catch (error: any) {
+      if (error.response && error.response.data) {
+        setErrorMessage(error.response.data.message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -104,8 +241,8 @@ export default function RegisterPage() {
                 name="nama"
                 type="text"
                 placeholder="e.g. Manuel Backher"
-                value={form.nama}
-                onChange={handleChange}
+                value={nama}
+                onChange={(e) => setNama(e.target.value)}
               />
 
               {/* No HP */}
@@ -114,8 +251,8 @@ export default function RegisterPage() {
                 name="noHp"
                 type="tel"
                 placeholder="e.g. 628123456789"
-                value={form.noHp}
-                onChange={handleChange}
+                value={noHp}
+                onChange={(e) => setNoHp(e.target.value)}
               />
 
               {/* Email */}
@@ -124,8 +261,8 @@ export default function RegisterPage() {
                 name="email"
                 type="email"
                 placeholder="e.g. ManuelBackher@gmail.com"
-                value={form.email}
-                onChange={handleChange}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
 
               {/* Password */}
@@ -134,38 +271,106 @@ export default function RegisterPage() {
                 name="password"
                 type="password"
                 placeholder="••••••••"
-                value={form.password}
-                onChange={handleChange}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+
+              {/* Provinsi */}
+              <RegionInput
+                label="Provinsi"
+                placeholder="Cari provinsi..."
+                value={provinceSearch}
+                regions={provinces}
+                onChange={(e) => {
+                  setProvinceSearch(e.target.value);
+
+                  setSelectedProvince(null);
+                  setSelectedRegency(null);
+                  setSelectedDistrict(null);
+
+                  setKotaKabupaten("");
+                  setKecamatan("");
+                  setDesa("");
+                }}
+                onSelect={(region) => {
+                  setSelectedProvince(region);
+
+                  setProvinceSearch(region.name);
+
+                  setSelectedRegency(null);
+                  setSelectedDistrict(null);
+
+                  setKotaKabupaten("");
+                  setKecamatan("");
+                  setDesa("");
+                }}
               />
 
               {/* Kota / Kabupaten */}
-              <InputField
+              <RegionInput
                 label="Kota / Kabupaten"
-                name="kotaKabupaten"
-                type="text"
-                placeholder="e.g. Malang"
-                value={form.kotaKabupaten}
-                onChange={handleChange}
+                placeholder="Cari kota atau kabupaten..."
+                value={kotaKabupaten}
+                regions={regencies}
+                loading={loadingRegencies}
+                disabled={!selectedProvince}
+                onChange={(e) => {
+                  setKotaKabupaten(e.target.value);
+
+                  setSelectedRegency(null);
+                  setSelectedDistrict(null);
+
+                  setKecamatan("");
+                  setDesa("");
+                }}
+                onSelect={(region) => {
+                  setSelectedRegency(region);
+
+                  setKotaKabupaten(region.name);
+
+                  setSelectedDistrict(null);
+
+                  setKecamatan("");
+                  setDesa("");
+                }}
               />
 
               {/* Kecamatan */}
-              <InputField
+              <RegionInput
                 label="Kecamatan"
-                name="kecamatan"
-                type="text"
-                placeholder="e.g. Soekarno Hatta"
-                value={form.kecamatan}
-                onChange={handleChange}
+                placeholder="Cari kecamatan..."
+                value={kecamatan}
+                regions={districts}
+                loading={loadingDistricts}
+                disabled={!selectedRegency}
+                onChange={(e) => {
+                  setKecamatan(e.target.value);
+
+                  setSelectedDistrict(null);
+                  setDesa("");
+                }}
+                onSelect={(region) => {
+                  setSelectedDistrict(region);
+
+                  setKecamatan(region.name);
+                  setDesa("");
+                }}
               />
 
               {/* Desa */}
-              <InputField
+              <RegionInput
                 label="Desa"
-                name="desa"
-                type="text"
-                placeholder="e.g. Sawojajar"
-                value={form.desa}
-                onChange={handleChange}
+                placeholder="Cari desa..."
+                value={desa}
+                regions={villages}
+                loading={loadingVillages}
+                disabled={!selectedDistrict}
+                onChange={(e) => {
+                  setDesa(e.target.value);
+                }}
+                onSelect={(region) => {
+                  setDesa(region.name);
+                }}
               />
 
               {/* Button */}

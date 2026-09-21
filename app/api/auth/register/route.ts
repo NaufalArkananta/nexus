@@ -94,6 +94,7 @@ export async function POST(request: NextRequest) {
           nama: user.nama,
           noHp: user.noHp,
           email: user.email,
+          message: "Pendaftaran Anda sedang menunggu verifikasi manual. Perkiraan waktu pemrosesan: 24 jam.",
         },
       },
       { status: 201 }
