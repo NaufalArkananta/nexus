@@ -1,27 +1,43 @@
 "use client";
 
+import { axiosInstance } from "@/lib/axios";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function LoginPage() {
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  const router = useRouter();
 
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    console.log(form);
+    if (isLoading) return;
+
+    setIsLoading(true);
+
+    try {
+      const payload = {
+        email,
+        password,
+      };
+
+      const response = await axiosInstance.post("/api/auth/login", payload);
+
+      setTimeout(() => {
+        router.replace("/");
+      }, 1200);
+    } catch (error: any) {
+      if (error.response && error.response.data) {
+        alert(error.response.data.message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -100,18 +116,18 @@ export default function LoginPage() {
                 name="email"
                 type="email"
                 placeholder="e.g. ManuelBackher@gmail.com"
-                value={form.email}
-                onChange={handleChange}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
 
               {/* Password */}
               <InputField
                 label="Password"
                 name="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
-                value={form.password}
-                onChange={handleChange}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
 
               {/* Login Button */}
