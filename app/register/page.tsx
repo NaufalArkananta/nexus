@@ -247,7 +247,7 @@ export default function RegisterPage() {
 
               {/* No HP */}
               <InputField
-                label="No.HP"
+                label="Nomor HP"
                 name="noHp"
                 type="tel"
                 placeholder="e.g. 628123456789"

@@ -10,7 +10,7 @@ export const registerSchema = Joi.object({
     .pattern(/^08[0-9]{8,13}$/)
     .required()
     .messages({
-      "string.pattern.base": "Nomor HP harus diawali 08 dan berupa angka",
+      "string.pattern.base": "Nomor HP harus diawali 08, berupa angka dan memiliki panjang 8-13 karakter",
     }),
 
   email: Joi.string()
