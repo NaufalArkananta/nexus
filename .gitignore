@@ -50,3 +50,6 @@ next-env.d.ts
 .next
 .windsurf
 generated
+
+#upload
+public/uploads/izin-operasional/*.pdf

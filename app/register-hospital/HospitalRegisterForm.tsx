@@ -1,8 +1,11 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { LockKeyhole, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import { axiosInstance } from "@/lib/axios";
+import RegionInput from "../register/RegionInput";
 
 export default function HospitalRegisterForm() {
   const router = useRouter();
@@ -11,15 +14,41 @@ export default function HospitalRegisterForm() {
   const [jenisRumahSakit, setJenisRumahSakit] = useState("");
   const [kelasTipe, setKelasTipe] = useState("");
   const [statusKepemilikan, setStatusKepemilikan] = useState("");
-  const [nomorIzinOperasional, setNomorIzinOperasional] =
-    useState("");
+  const [nomorIzinOperasional, setNomorIzinOperasional] = useState("");
   const [alamatLengkap, setAlamatLengkap] = useState("");
-  const [kabupatenKota, setKabupatenKota] = useState("");
   const [nomorTelepon, setNomorTelepon] = useState("");
   const [emailResmi, setEmailResmi] = useState("");
   const [namaPIC, setNamaPIC] = useState("");
   const [emailPIC, setEmailPIC] = useState("");
   const [password, setPassword] = useState("");
+
+  const [provinces, setProvinces] = useState([]);
+
+  const [regencies, setRegencies] = useState([]);
+
+  const [districts, setDistricts] = useState([]);
+
+  const [villages, setVillages] = useState([]);
+
+  const [selectedProvince, setSelectedProvince] = useState(null);
+
+  const [selectedRegency, setSelectedRegency] = useState(null);
+
+  const [selectedDistrict, setSelectedDistrict] = useState(null);
+
+  const [provinceSearch, setProvinceSearch] = useState("");
+
+  const [kotaKabupaten, setKotaKabupaten] = useState("");
+
+  const [kecamatan, setKecamatan] = useState("");
+
+  const [desaKelurahan, setDesaKelurahan] = useState("");
+
+  const [loadingRegencies, setLoadingRegencies] = useState(false);
+
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
+
+  const [loadingVillages, setLoadingVillages] = useState(false);
 
   const [dokumenIzinOperasional, setDokumenIzinOperasional] =
     useState<File | null>(null);
@@ -28,15 +57,111 @@ export default function HospitalRegisterForm() {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (
-    e: FormEvent<HTMLFormElement>
-  ) => {
+  useEffect(() => {
+    const fetchProvinces = async () => {
+      try {
+        const response = await axiosInstance.get("/api/wilayah/provinces");
+
+        setProvinces(response.data.data);
+      } catch (error) {
+        console.error("Gagal mengambil provinsi:", error);
+      }
+    };
+
+    fetchProvinces();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedProvince) {
+      setRegencies([]);
+      return;
+    }
+
+    const fetchRegencies = async () => {
+      try {
+        setLoadingRegencies(true);
+
+        const response = await axiosInstance.get(
+          `/api/wilayah/regencies/${selectedProvince.code}`,
+        );
+
+        setRegencies(response.data.data);
+      } catch (error) {
+        console.error("Gagal mengambil kabupaten/kota:", error);
+      } finally {
+        setLoadingRegencies(false);
+      }
+    };
+
+    fetchRegencies();
+  }, [selectedProvince]);
+
+  useEffect(() => {
+    if (!selectedRegency) {
+      setDistricts([]);
+      return;
+    }
+
+    const fetchDistricts = async () => {
+      try {
+        setLoadingDistricts(true);
+
+        const response = await axiosInstance.get(
+          `/api/wilayah/districts/${selectedRegency.code}`,
+        );
+
+        setDistricts(response.data.data);
+      } catch (error) {
+        console.error("Gagal mengambil kecamatan:", error);
+      } finally {
+        setLoadingDistricts(false);
+      }
+    };
+
+    fetchDistricts();
+  }, [selectedRegency]);
+
+  useEffect(() => {
+    if (!selectedDistrict) {
+      setVillages([]);
+      return;
+    }
+
+    const fetchVillages = async () => {
+      try {
+        setLoadingVillages(true);
+
+        const response = await axiosInstance.get(
+          `/api/wilayah/villages/${selectedDistrict.code}`,
+        );
+
+        setVillages(response.data.data);
+      } catch (error) {
+        console.error("Gagal mengambil desa/kelurahan:", error);
+      } finally {
+        setLoadingVillages(false);
+      }
+    };
+
+    fetchVillages();
+  }, [selectedDistrict]);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (isLoading) return;
 
     if (!persetujuan) {
-      
+      toast.error("Anda harus menyetujui pernyataan data", {
+        containerId: "toastRegister",
+      });
+      return;
+    }
+
+    if (!dokumenIzinOperasional) {
+      toast.error("Dokumen izin operasional wajib diupload", {
+        containerId: "toastRegister",
+      });
       return;
     }
 
@@ -46,59 +171,55 @@ export default function HospitalRegisterForm() {
       const formData = new FormData();
 
       formData.append("namaRumahSakit", namaRumahSakit);
+
       formData.append("jenisRumahSakit", jenisRumahSakit);
+
       formData.append("kelasTipe", kelasTipe);
-      formData.append(
-        "statusKepemilikan",
-        statusKepemilikan
-      );
-      formData.append(
-        "nomorIzinOperasional",
-        nomorIzinOperasional
-      );
+
+      formData.append("statusKepemilikan", statusKepemilikan);
+
+      formData.append("nomorIzinOperasional", nomorIzinOperasional);
+
       formData.append("alamatLengkap", alamatLengkap);
-      formData.append("kabupatenKota", kabupatenKota);
+
+      formData.append("provinsi", selectedProvince?.name || "");
+
+      formData.append("kabupatenKota", kotaKabupaten);
+
+      formData.append("kecamatan", kecamatan);
+
+      formData.append("desaKelurahan", desaKelurahan);
+
       formData.append("nomorTelepon", nomorTelepon);
+
       formData.append("emailResmi", emailResmi);
+
       formData.append("namaPIC", namaPIC);
+
       formData.append("emailPIC", emailPIC);
+
       formData.append("password", password);
-      formData.append(
-        "persetujuan",
-        String(persetujuan)
+
+      formData.append("persetujuan", String(persetujuan));
+
+      formData.append("dokumenIzinOperasional", dokumenIzinOperasional);
+
+      const response = await axiosInstance.post(
+        "/api/hospital-register",
+        formData,
       );
 
-      if (dokumenIzinOperasional) {
-        formData.append(
-          "dokumenIzinOperasional",
-          dokumenIzinOperasional
-        );
-      }
-
-    //   const response = await f(
-    //     "/api/auth/register-rumah-sakit",
-    //     formData
-    //   );
-
-    //   toast.success(
-    //     response.data?.message ||
-    //       "Pendaftaran berhasil dikirim",
-    //     {
-    //       containerId: "toastRegister",
-    //     }
-    //   );
+      toast.success(response.data?.message || "Pendaftaran berhasil", {
+        containerId: "toastRegister",
+      });
 
       setTimeout(() => {
         router.replace("/login");
       }, 1200);
     } catch (error: any) {
-    //   toast.error(
-    //     error.response?.data?.message ||
-    //       "Pendaftaran gagal",
-    //     {
-    //       containerId: "toastRegister",
-    //     }
-    //   );
+      toast.error(error.response?.data?.message || "Pendaftaran gagal", {
+        containerId: "toastRegister",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -124,18 +245,13 @@ export default function HospitalRegisterForm() {
         </div>
 
         {/* Form */}
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4"
-        >
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Nama Rumah Sakit */}
           <InputField
             label="Nama Rumah Sakit / Faskes"
             placeholder="Masukkan nama resmi institusi"
             value={namaRumahSakit}
-            onChange={(e) =>
-              setNamaRumahSakit(e.target.value)
-            }
+            onChange={(e) => setNamaRumahSakit(e.target.value)}
           />
 
           {/* Jenis Rumah Sakit */}
@@ -143,9 +259,7 @@ export default function HospitalRegisterForm() {
             label="Jenis Rumah sakit"
             placeholder="Contoh: Rumah Sakit Umum"
             value={jenisRumahSakit}
-            onChange={(e) =>
-              setJenisRumahSakit(e.target.value)
-            }
+            onChange={(e) => setJenisRumahSakit(e.target.value)}
           />
 
           {/* Kelas */}
@@ -153,9 +267,7 @@ export default function HospitalRegisterForm() {
             label="Kelas/Tipe"
             placeholder="Masukkan Kelas/Tipe"
             value={kelasTipe}
-            onChange={(e) =>
-              setKelasTipe(e.target.value)
-            }
+            onChange={(e) => setKelasTipe(e.target.value)}
           />
 
           {/* Status */}
@@ -163,9 +275,7 @@ export default function HospitalRegisterForm() {
             label="Status Kepemilikan"
             placeholder="Masukkan Status Kepemilikan"
             value={statusKepemilikan}
-            onChange={(e) =>
-              setStatusKepemilikan(e.target.value)
-            }
+            onChange={(e) => setStatusKepemilikan(e.target.value)}
           />
 
           {/* Nomor Izin */}
@@ -173,9 +283,7 @@ export default function HospitalRegisterForm() {
             label="Nomor Izin Operasional"
             placeholder="Masukkan Nomor Izin Operasional"
             value={nomorIzinOperasional}
-            onChange={(e) =>
-              setNomorIzinOperasional(e.target.value)
-            }
+            onChange={(e) => setNomorIzinOperasional(e.target.value)}
           />
 
           {/* Alamat */}
@@ -183,19 +291,103 @@ export default function HospitalRegisterForm() {
             label="Alamat Lengkap"
             placeholder="Masukkan Alamat Lengkap"
             value={alamatLengkap}
-            onChange={(e) =>
-              setAlamatLengkap(e.target.value)
-            }
+            onChange={(e) => setAlamatLengkap(e.target.value)}
+          />
+
+          {/* Provinsi */}
+          <RegionInput
+            label="Provinsi"
+            placeholder="Cari provinsi..."
+            value={provinceSearch}
+            regions={provinces}
+            onChange={(e) => {
+              setProvinceSearch(e.target.value);
+
+              setSelectedProvince(null);
+              setSelectedRegency(null);
+              setSelectedDistrict(null);
+
+              setKotaKabupaten("");
+              setKecamatan("");
+              setDesaKelurahan("");
+            }}
+            onSelect={(region) => {
+              setSelectedProvince(region);
+              setProvinceSearch(region.name);
+
+              setSelectedRegency(null);
+              setSelectedDistrict(null);
+
+              setKotaKabupaten("");
+              setKecamatan("");
+              setDesaKelurahan("");
+            }}
           />
 
           {/* Kabupaten */}
-          <InputField
-            label="Kabupaten/Kota"
-            placeholder="Pilih wilayah institusi"
-            value={kabupatenKota}
-            onChange={(e) =>
-              setKabupatenKota(e.target.value)
-            }
+          <RegionInput
+            label="Kabupaten / Kota"
+            placeholder="Cari kota atau kabupaten..."
+            value={kotaKabupaten}
+            regions={regencies}
+            loading={loadingRegencies}
+            disabled={!selectedProvince}
+            onChange={(e) => {
+              setKotaKabupaten(e.target.value);
+
+              setSelectedRegency(null);
+              setSelectedDistrict(null);
+
+              setKecamatan("");
+              setDesaKelurahan("");
+            }}
+            onSelect={(region) => {
+              setSelectedRegency(region);
+              setKotaKabupaten(region.name);
+
+              setSelectedDistrict(null);
+
+              setKecamatan("");
+              setDesaKelurahan("");
+            }}
+          />
+
+          {/* Kecamatan */}
+          <RegionInput
+            label="Kecamatan"
+            placeholder="Cari kecamatan..."
+            value={kecamatan}
+            regions={districts}
+            loading={loadingDistricts}
+            disabled={!selectedRegency}
+            onChange={(e) => {
+              setKecamatan(e.target.value);
+
+              setSelectedDistrict(null);
+              setDesaKelurahan("");
+            }}
+            onSelect={(region) => {
+              setSelectedDistrict(region);
+              setKecamatan(region.name);
+
+              setDesaKelurahan("");
+            }}
+          />
+
+          {/* Desa */}
+          <RegionInput
+            label="Desa / Kelurahan"
+            placeholder="Cari desa atau kelurahan..."
+            value={desaKelurahan}
+            regions={villages}
+            loading={loadingVillages}
+            disabled={!selectedDistrict}
+            onChange={(e) => {
+              setDesaKelurahan(e.target.value);
+            }}
+            onSelect={(region) => {
+              setDesaKelurahan(region.name);
+            }}
           />
 
           {/* Telepon */}
@@ -203,9 +395,7 @@ export default function HospitalRegisterForm() {
             label="Nomor Telepon"
             placeholder="Masukkan Nomor Telepon"
             value={nomorTelepon}
-            onChange={(e) =>
-              setNomorTelepon(e.target.value)
-            }
+            onChange={(e) => setNomorTelepon(e.target.value)}
           />
 
           {/* Email Resmi */}
@@ -214,9 +404,7 @@ export default function HospitalRegisterForm() {
             type="email"
             placeholder="nama@rumahsakit.go.id"
             value={emailResmi}
-            onChange={(e) =>
-              setEmailResmi(e.target.value)
-            }
+            onChange={(e) => setEmailResmi(e.target.value)}
           />
 
           {/* Nama PIC */}
@@ -224,9 +412,7 @@ export default function HospitalRegisterForm() {
             label="Nama PIC"
             placeholder="Masukan Nama PIC"
             value={namaPIC}
-            onChange={(e) =>
-              setNamaPIC(e.target.value)
-            }
+            onChange={(e) => setNamaPIC(e.target.value)}
           />
 
           {/* Email PIC */}
@@ -235,9 +421,7 @@ export default function HospitalRegisterForm() {
             type="email"
             placeholder="namaPIC@rumahsakit.go.id"
             value={emailPIC}
-            onChange={(e) =>
-              setEmailPIC(e.target.value)
-            }
+            onChange={(e) => setEmailPIC(e.target.value)}
           />
 
           {/* Password */}
@@ -246,9 +430,7 @@ export default function HospitalRegisterForm() {
             type="password"
             placeholder="Masukan Password"
             value={password}
-            onChange={(e) =>
-              setPassword(e.target.value)
-            }
+            onChange={(e) => setPassword(e.target.value)}
           />
 
           {/* Upload */}
@@ -286,9 +468,7 @@ export default function HospitalRegisterForm() {
             <input
               type="checkbox"
               checked={persetujuan}
-              onChange={(e) =>
-                setPersetujuan(e.target.checked)
-              }
+              onChange={(e) => setPersetujuan(e.target.checked)}
               className="mt-0.5 h-3.5 w-3.5"
             />
 
@@ -303,24 +483,18 @@ export default function HospitalRegisterForm() {
             disabled={isLoading}
             className="h-11 w-full rounded-md bg-[#1762ad] text-sm font-semibold text-white shadow-sm transition hover:bg-[#125494] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isLoading
-              ? "Memproses..."
-              : "Daftar untuk Verifikasi"}
+            {isLoading ? "Memproses..." : "Daftar untuk Verifikasi"}
           </button>
         </form>
 
         {/* Bottom Information */}
         <div className="mt-12 border-t border-gray-200 pt-5">
           <div className="flex items-start gap-3 text-[10px] leading-4 text-gray-500">
-            <LockKeyhole
-              size={15}
-              className="mt-0.5 shrink-0 text-[#27816c]"
-            />
+            <LockKeyhole size={15} className="mt-0.5 shrink-0 text-[#27816c]" />
 
             <p>
-              Pendaftaran ditinjau oleh tim MEDLINK. Hanya
-              fasilitas dengan identitas Kemenkes yang valid
-              dapat bergabung.
+              Pendaftaran ditinjau oleh tim MEDLINK. Hanya fasilitas dengan
+              identitas Kemenkes yang valid dapat bergabung.
             </p>
           </div>
         </div>
@@ -336,9 +510,7 @@ type InputFieldProps = {
   placeholder: string;
   value: string;
   type?: string;
-  onChange: (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
 function InputField({

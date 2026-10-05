@@ -27,3 +27,38 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
+
+model Hospital {
+  id                   Int    @id @default(autoincrement())
+  namaRumahSakit       String
+  jenisRumahSakit      String
+  kelasTipe            String
+  statusKepemilikan    String
+  nomorIzinOperasional String @unique
+
+  alamatLengkap String
+  provinsi      String
+  kabupatenKota String
+  kecamatan     String
+  desaKelurahan String
+
+  nomorTelepon String
+  emailResmi   String @unique
+  namaPIC      String
+  emailPIC     String
+  password     String
+
+  dokumenIzinOperasional String
+  persetujuan            Boolean
+
+  statusVerifikasi StatusVerifikasi @default(MENUNGGU)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum StatusVerifikasi {
+  MENUNGGU
+  DISETUJUI
+  DITOLAK
+}
