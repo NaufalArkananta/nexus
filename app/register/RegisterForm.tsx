@@ -25,6 +25,7 @@ export default function RegisterForm() {
   const [noHp, setNoHp] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [golDarah, setGolDarah] = useState("");
 
   /* =====================================================
      REGION
@@ -229,6 +230,7 @@ export default function RegisterForm() {
         noHp,
         email,
         password,
+        golDarah,
         provinsi: selectedProvince?.name,
         kabupatenKota: kotaKabupaten,
         kecamatan,
@@ -298,6 +300,15 @@ export default function RegisterForm() {
               onChange={(e) =>
                 setNama(e.target.value)
               }
+            />
+
+            <RegisterInput
+              label="Golongan Darah"
+              name="golDarah"
+              type="text"
+              placeholder="e.g. O"
+              value={golDarah}
+              onChange={(e) => setGolDarah(e.target.value)}
             />
 
             {/* No HP */}
