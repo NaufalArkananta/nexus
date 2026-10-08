@@ -8,9 +8,21 @@ import { validateUploadedFile } from "@/middleware/validateFile";
 import fs from "fs/promises";
 import path from "path";
 import { rumahSakitRegisterSchema } from "@/validations/hospital.validation";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
+    const user = getAuthenticatedUser(request);
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          message: "Anda harus login terlebih dahulu",
+        },
+        { status: 401 },
+      );
+    }
+
     /* =====================================================
        1. AMBIL FORMDATA
     ===================================================== */
@@ -209,6 +221,8 @@ export async function POST(request: NextRequest) {
 
     const rumahSakit = await prisma.hospital.create({
       data: {
+        userId: user.userId,
+
         namaRumahSakit: value.namaRumahSakit,
 
         jenisRumahSakit: value.jenisRumahSakit,
