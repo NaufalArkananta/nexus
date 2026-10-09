@@ -40,9 +40,16 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+/generated/prisma
+.agents
+.claude
+.windsurf
 #prisma
 .agents
 .claude
 .next
 .windsurf
 generated
+
+#upload
+public/uploads/izin-operasional/*.pdf
