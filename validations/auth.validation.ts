@@ -6,6 +6,11 @@ export const registerSchema = Joi.object({
     .max(100)
     .required(),
 
+  golDarah: Joi.string()
+    .min(1)
+    .max(10)
+    .required(),
+
   noHp: Joi.string()
     .pattern(/^08[0-9]{8,13}$/)
     .required()

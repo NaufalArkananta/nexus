@@ -2,8 +2,11 @@ import axios from "axios";
 
 export const axiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL,
-  timeout: 10000,
-  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
+  timeout: 30000, // Tambah timeout
+  withCredentials: true, // Untuk mengirim cookie/session
 });
 
 // Request interceptor

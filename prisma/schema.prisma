@@ -26,6 +26,8 @@ model User {
   kodePos       String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  golDarah      String
+}
 
   hospital Hospital?
   beritas  Berita[]
