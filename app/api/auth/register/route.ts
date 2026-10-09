@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
       desaKelurahan,
       alamat,
       kodePos,
+      golDarah
     } = value;
 
     // Cek email
@@ -83,6 +84,7 @@ export async function POST(request: NextRequest) {
         desaKelurahan,
         alamat,
         kodePos,
+        golDarah
       },
     });
 
@@ -100,12 +102,11 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error(error);
-
-    return NextResponse.json(
-      {
-        message: "Terjadi kesalahan pada server",
-      },
+    console.error("REGISTER ERROR:");
+    console.dir(error, { depth: 10 });
+  
+    return Response.json(
+      { message: "Terjadi kesalahan pada server" },
       { status: 500 }
     );
   }

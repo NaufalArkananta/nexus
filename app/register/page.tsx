@@ -1,10 +1,16 @@
+
 "use client";
 
 import Image from "next/image";
-import { FormEvent, useEffect, useState } from "react";
+import {
+  FormEvent,
+  useEffect,
+  useState,
+} from "react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 import RegionInput from "./RegionInput";
 import { axiosInstance } from "@/lib/axios";
-import { useRouter } from "next/navigation";
 
 type Region = {
   code: string;
@@ -12,136 +18,180 @@ type Region = {
 };
 
 export default function RegisterPage() {
-  const [showModal, setShowModal] = useState(false);
+  const router = useRouter();
 
+  const [provinces, setProvinces] = useState<Region[]>([]);
   const [regencies, setRegencies] = useState<Region[]>([]);
   const [districts, setDistricts] = useState<Region[]>([]);
   const [villages, setVillages] = useState<Region[]>([]);
 
-  const [loadingRegencies, setLoadingRegencies] = useState(false);
-  const [loadingDistricts, setLoadingDistricts] = useState(false);
-  const [loadingVillages, setLoadingVillages] = useState(false);
+  const [selectedProvince, setSelectedProvince] =
+    useState<Region | null>(null);
+  const [selectedRegency, setSelectedRegency] =
+    useState<Region | null>(null);
+  const [selectedDistrict, setSelectedDistrict] =
+    useState<Region | null>(null);
 
-  const [selectedRegency, setSelectedRegency] = useState<Region | null>(null);
-
-  const [selectedDistrict, setSelectedDistrict] = useState<Region | null>(null);
-
-  const [provinces, setProvinces] = useState<Region[]>([]);
-  const [selectedProvince, setSelectedProvince] = useState<Region | null>(null);
+  const [provinceSearch, setProvinceSearch] = useState("");
+  const [kotaKabupaten, setKotaKabupaten] = useState("");
+  const [kecamatan, setKecamatan] = useState("");
+  const [desa, setDesa] = useState("");
 
   const [nama, setNama] = useState("");
   const [noHp, setNoHp] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [provinceSearch, setProvinceSearch] = useState("");
-  const [kotaKabupaten, setKotaKabupaten] = useState("");
-  const [kecamatan, setKecamatan] = useState("");
-  const [desa, setDesa] = useState("");
   const [golDarah, setGolDarah] = useState("");
 
-  const [showPassword, setShowPassword] = useState(false);
+  const [loadingRegencies, setLoadingRegencies] = useState(false);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
+  const [loadingVillages, setLoadingVillages] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Ambil provinsi
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchProvinces = async () => {
       try {
-        const response = await axiosInstance.get("/api/wilayah/provinces");
+        const response = await axiosInstance.get(
+          "/api/wilayah/provinces",
+          { signal: controller.signal }
+        );
 
         setProvinces(response.data.data);
       } catch (error) {
+        if (axios.isCancel(error)) return;
+
         console.error("Gagal mengambil provinsi:", error);
       }
     };
 
     fetchProvinces();
+
+    return () => controller.abort();
   }, []);
 
+  // Ambil kabupaten/kota
   useEffect(() => {
+    const controller = new AbortController();
+
     if (!selectedProvince) {
       setRegencies([]);
-      return;
+      return () => controller.abort();
     }
 
     const fetchRegencies = async () => {
-      try {
-        setLoadingRegencies(true);
+      setLoadingRegencies(true);
 
+      try {
         const response = await axiosInstance.get(
           `/api/wilayah/regencies/${selectedProvince.code}`,
+          { signal: controller.signal }
         );
 
         setRegencies(response.data.data);
       } catch (error) {
-        console.error("Gagal mengambil kabupaten/kota:", error);
+        if (axios.isCancel(error)) return;
+
+        console.error(
+          "Gagal mengambil kabupaten/kota:",
+          error
+        );
       } finally {
-        setLoadingRegencies(false);
+        if (!controller.signal.aborted) {
+          setLoadingRegencies(false);
+        }
       }
     };
 
     fetchRegencies();
+
+    return () => controller.abort();
   }, [selectedProvince]);
 
+  // Ambil kecamatan
   useEffect(() => {
+    const controller = new AbortController();
+
     if (!selectedRegency) {
       setDistricts([]);
-      return;
+      return () => controller.abort();
     }
 
     const fetchDistricts = async () => {
-      try {
-        setLoadingDistricts(true);
+      setLoadingDistricts(true);
 
+      try {
         const response = await axiosInstance.get(
           `/api/wilayah/districts/${selectedRegency.code}`,
+          { signal: controller.signal }
         );
 
         setDistricts(response.data.data);
       } catch (error) {
+        if (axios.isCancel(error)) return;
+
         console.error("Gagal mengambil kecamatan:", error);
       } finally {
-        setLoadingDistricts(false);
+        if (!controller.signal.aborted) {
+          setLoadingDistricts(false);
+        }
       }
     };
 
     fetchDistricts();
+
+    return () => controller.abort();
   }, [selectedRegency]);
 
+  // Ambil desa/kelurahan
   useEffect(() => {
+    const controller = new AbortController();
+
     if (!selectedDistrict) {
       setVillages([]);
-      return;
+      return () => controller.abort();
     }
 
     const fetchVillages = async () => {
-      try {
-        setLoadingVillages(true);
+      setLoadingVillages(true);
 
+      try {
         const response = await axiosInstance.get(
           `/api/wilayah/villages/${selectedDistrict.code}`,
+          { signal: controller.signal }
         );
 
         setVillages(response.data.data);
       } catch (error) {
+        if (axios.isCancel(error)) return;
+
         console.error("Gagal mengambil desa:", error);
       } finally {
-        setLoadingVillages(false);
+        if (!controller.signal.aborted) {
+          setLoadingVillages(false);
+        }
       }
     };
 
     fetchVillages();
+
+    return () => controller.abort();
   }, [selectedDistrict]);
 
-  const router = useRouter();
-
-  const handleSubmit = async (e: FormEvent) => {
+  // Registrasi pengguna
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (isLoading) return;
 
     setIsLoading(true);
+    setErrorMessage("");
 
     try {
       const payload = {
@@ -149,20 +199,31 @@ export default function RegisterPage() {
         noHp,
         email,
         password,
+        golDarah,
         provinsi: selectedProvince?.name,
         kabupatenKota: kotaKabupaten,
         kecamatan,
         desaKelurahan: desa,
       };
 
-      const response = await axiosInstance.post("/api/auth/register", payload);
+      await axiosInstance.post(
+        "/api/auth/register",
+        payload
+      );
+      
+      router.replace("/login");
 
-      setTimeout(() => {
-        router.replace("/login");
-      }, 1200);
-    } catch (error: any) {
-      if (error.response && error.response.data) {
-        setErrorMessage(error.response.data.message);
+      setShowModal(true);
+    } catch (error: unknown) {
+      if (axios.isCancel(error)) return;
+
+      if (axios.isAxiosError(error)) {
+        setErrorMessage(
+          error.response?.data?.message ||
+            "Registrasi gagal. Periksa koneksi dan coba lagi."
+        );
+      } else {
+        setErrorMessage("Terjadi kesalahan. Silakan coba lagi.");
       }
     } finally {
       setIsLoading(false);
@@ -172,23 +233,20 @@ export default function RegisterPage() {
   return (
     <main className="min-h-screen bg-white">
       <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
-        {/* ================= LEFT ================= */}
-        <section className="relative flex min-h-screen flex-col justify-between bg-[#1759BD] px-8 py-8 text-white lg:px-14 lg:py-12">
-          {/* Logo */}
-          <div>
-            <div className="flex items-center gap-3">
-              <Image
-                src="/Frame.png"
-                alt="Next.js logo"
-                width={50}
-                height={50}
-              />
-
-              <span className="text-xl font-bold tracking-tight">MEDLINK</span>
-            </div>
+        {/* Panel kiri */}
+        <section className="flex min-h-screen flex-col justify-between bg-[#1759BD] px-8 py-8 text-white lg:px-14 lg:py-12">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/Frame.png"
+              alt="MedLink"
+              width={50}
+              height={50}
+            />
+            <span className="text-xl font-bold tracking-tight">
+              MEDLINK
+            </span>
           </div>
 
-          {/* Hero */}
           <div className="max-w-xl">
             <h1 className="text-4xl font-bold leading-[1.1] tracking-tight lg:text-[40px]">
               Jaringan Pengiriman
@@ -197,95 +255,83 @@ export default function RegisterPage() {
             </h1>
 
             <p className="mt-5 max-w-lg text-sm leading-6 text-white/90">
-              Menyediakan akses terverifikasi bagi institusi layanan kesehatan
-              untuk menyiarkan peringatan pengiriman darah darurat secara instan
-              kepada para pendonor regional yang memenuhi syarat.
+              Menyediakan akses terverifikasi bagi institusi
+              layanan kesehatan untuk menyiarkan peringatan
+              pengiriman darah darurat kepada pendonor regional
+              yang memenuhi syarat.
             </p>
 
-            {/* Features */}
             <div className="mt-6 space-y-4">
               <Feature text="Pengendalian Akses untuk Verifikasi Kode Fasilitas Pelayanan Kesehatan" />
-
               <Feature text="Data diawasi oleh Pemerintah" />
-
               <Feature text="Algoritma pencocokan hiperlocal instan untuk peringatan kritis" />
             </div>
           </div>
 
-          {/* Footer */}
-          <div>
-            <p className="text-[10px] text-white/80">
-              © 2026 MEDLINKSync. Standardizing hyperlocal B2B medical dispatch.
-            </p>
-          </div>
+          <p className="text-[10px] text-white/80">
+            © 2026 MEDLINKSync. Standardizing hyperlocal B2B
+            medical dispatch.
+          </p>
         </section>
 
-        {/* ================= RIGHT ================= */}
+        {/* Panel kanan */}
         <section className="flex min-h-screen items-center justify-center bg-white px-6 py-10 lg:px-12">
           <div className="w-full max-w-[430px]">
-            {/* Header */}
             <div className="mb-8">
               <h2 className="text-2xl font-bold tracking-tight text-[#111827]">
                 Registrasi Pengguna
               </h2>
-
               <p className="mt-1 text-sm text-gray-400">
-                Daftarkan Diri Anda untuk bergabung dengan kami.
+                Daftarkan diri Anda untuk bergabung dengan kami.
               </p>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Name */}
               <InputField
-                label="Name"
+                label="Nama"
                 name="nama"
                 type="text"
-                placeholder="e.g. Manuel Backher"
+                placeholder="Nama lengkap"
                 value={nama}
                 onChange={(e) => setNama(e.target.value)}
               />
 
-            <InputField
+              <InputField
                 label="Golongan Darah"
                 name="golDarah"
                 type="text"
-                placeholder="e.g. O"
+                placeholder="Contoh: O"
                 value={golDarah}
                 onChange={(e) => setGolDarah(e.target.value)}
               />
 
-              {/* No HP */}
               <InputField
                 label="Nomor HP"
                 name="noHp"
                 type="tel"
-                placeholder="e.g. 628123456789"
+                placeholder="628123456789"
                 value={noHp}
                 onChange={(e) => setNoHp(e.target.value)}
               />
 
-              {/* Email */}
               <InputField
                 label="Email"
                 name="email"
                 type="email"
-                placeholder="e.g. ManuelBackher@gmail.com"
+                placeholder="email@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
 
-              {/* Password */}
               <InputField
                 label="Password"
                 name="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder="Minimal sesuai aturan server"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
 
-              {/* Provinsi */}
               <RegionInput
                 label="Provinsi"
                 placeholder="Cari provinsi..."
@@ -293,30 +339,24 @@ export default function RegisterPage() {
                 regions={provinces}
                 onChange={(e) => {
                   setProvinceSearch(e.target.value);
-
                   setSelectedProvince(null);
                   setSelectedRegency(null);
                   setSelectedDistrict(null);
-
                   setKotaKabupaten("");
                   setKecamatan("");
                   setDesa("");
                 }}
                 onSelect={(region) => {
                   setSelectedProvince(region);
-
                   setProvinceSearch(region.name);
-
                   setSelectedRegency(null);
                   setSelectedDistrict(null);
-
                   setKotaKabupaten("");
                   setKecamatan("");
                   setDesa("");
                 }}
               />
 
-              {/* Kota / Kabupaten */}
               <RegionInput
                 label="Kota / Kabupaten"
                 placeholder="Cari kota atau kabupaten..."
@@ -326,26 +366,20 @@ export default function RegisterPage() {
                 disabled={!selectedProvince}
                 onChange={(e) => {
                   setKotaKabupaten(e.target.value);
-
                   setSelectedRegency(null);
                   setSelectedDistrict(null);
-
                   setKecamatan("");
                   setDesa("");
                 }}
                 onSelect={(region) => {
                   setSelectedRegency(region);
-
                   setKotaKabupaten(region.name);
-
                   setSelectedDistrict(null);
-
                   setKecamatan("");
                   setDesa("");
                 }}
               />
 
-              {/* Kecamatan */}
               <RegionInput
                 label="Kecamatan"
                 placeholder="Cari kecamatan..."
@@ -355,19 +389,16 @@ export default function RegisterPage() {
                 disabled={!selectedRegency}
                 onChange={(e) => {
                   setKecamatan(e.target.value);
-
                   setSelectedDistrict(null);
                   setDesa("");
                 }}
                 onSelect={(region) => {
                   setSelectedDistrict(region);
-
                   setKecamatan(region.name);
                   setDesa("");
                 }}
               />
 
-              {/* Desa */}
               <RegionInput
                 label="Desa"
                 placeholder="Cari desa..."
@@ -375,26 +406,27 @@ export default function RegisterPage() {
                 regions={villages}
                 loading={loadingVillages}
                 disabled={!selectedDistrict}
-                onChange={(e) => {
-                  setDesa(e.target.value);
-                }}
-                onSelect={(region) => {
-                  setDesa(region.name);
-                }}
+                onChange={(e) => setDesa(e.target.value)}
+                onSelect={(region) => setDesa(region.name)}
               />
 
-              {/* Button */}
+              {errorMessage && (
+                <p className="text-sm text-red-600" role="alert">
+                  {errorMessage}
+                </p>
+              )}
+
               <button
                 type="submit"
-                className="mt-2 w-full rounded-md bg-[#1759BD] py-2.5 text-sm font-semibold text-white transition hover:bg-[#124da8] active:scale-[0.99]"
+                disabled={isLoading}
+                className="mt-2 w-full rounded-md bg-[#1759BD] py-2.5 text-sm font-semibold text-white transition hover:bg-[#124da8] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Verifikasi
+                {isLoading ? "Memproses..." : "Verifikasi"}
               </button>
             </form>
 
-            {/* Login */}
             <div className="mt-4 text-center text-xs text-gray-400">
-              Sudah Registrasi?{" "}
+              Sudah registrasi?{" "}
               <a
                 href="/login"
                 className="font-semibold text-[#1759BD] hover:underline"
@@ -406,11 +438,10 @@ export default function RegisterPage() {
         </section>
       </div>
 
-      {/* ================= MODAL ================= */}
+      {/* Modal sukses */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-5">
           <div className="w-full max-w-[340px] rounded-xl bg-white p-6 shadow-2xl">
-            {/* Icon */}
             <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
               <svg
                 width="22"
@@ -425,7 +456,6 @@ export default function RegisterPage() {
                   strokeWidth="1.8"
                   strokeLinejoin="round"
                 />
-
                 <path
                   d="M8.5 12L11 14.5L15.5 9.5"
                   stroke="#16A34A"
@@ -436,23 +466,21 @@ export default function RegisterPage() {
               </svg>
             </div>
 
-            {/* Title */}
             <h3 className="text-base font-bold text-gray-900">
-              Verifikasi Berhasil
+              Registrasi Berhasil
             </h3>
 
-            {/* Description */}
             <p className="mt-2 text-xs leading-5 text-gray-500">
-              Pendaftaran Anda sedang menunggu verifikasi manual. Perkiraan
-              waktu pemrosesan: 24 jam.
+              Pendaftaran Anda sedang menunggu verifikasi manual.
+              Perkiraan waktu pemrosesan: 24 jam.
             </p>
 
-            {/* Close */}
             <button
-              onClick={() => setShowModal(false)}
-              className="mt-5 w-full rounded-md border border-[#1759BD] py-2 text-xs font-medium text-[#1759BD] transition hover:bg-[#1759BD] hover:text-white"
+              type="button"
+              onClick={() => router.replace("/login")}
+              className="mt-5 w-full rounded-md bg-[#1759BD] py-2 text-xs font-medium text-white hover:bg-[#124da8]"
             >
-              Tutup
+              Lanjut ke Login
             </button>
           </div>
         </div>
@@ -460,10 +488,6 @@ export default function RegisterPage() {
     </main>
   );
 }
-
-/* =====================================================
-   INPUT COMPONENT
-===================================================== */
 
 type InputFieldProps = {
   label: string;
@@ -505,10 +529,6 @@ function InputField({
   );
 }
 
-/* =====================================================
-   FEATURE COMPONENT
-===================================================== */
-
 function Feature({ text }: { text: string }) {
   return (
     <div className="flex items-center gap-3">
@@ -523,7 +543,6 @@ function Feature({ text }: { text: string }) {
           />
         </svg>
       </div>
-
       <span className="text-xs text-white/95">{text}</span>
     </div>
   );

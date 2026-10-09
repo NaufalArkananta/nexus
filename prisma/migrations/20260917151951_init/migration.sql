@@ -13,6 +13,7 @@ CREATE TABLE `User` (
     `kodePos` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
+    `golDarah` VARCHAR(10),
 
     UNIQUE INDEX `User_noHp_key`(`noHp`),
     UNIQUE INDEX `User_email_key`(`email`),

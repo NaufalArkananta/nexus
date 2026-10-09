@@ -5,7 +5,7 @@ export const axiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 10000, // Tambah timeout
+  timeout: 30000, // Tambah timeout
   withCredentials: true, // Untuk mengirim cookie/session
 });
 
