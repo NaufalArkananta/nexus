@@ -44,3 +44,12 @@ next-env.d.ts
 .agents
 .claude
 .windsurf
+#prisma
+.agents
+.claude
+.next
+.windsurf
+generated
+
+#upload
+public/uploads/izin-operasional/*.pdf

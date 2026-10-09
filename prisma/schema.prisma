@@ -28,3 +28,87 @@ model User {
   updatedAt     DateTime @updatedAt
   golDarah      String
 }
+
+  hospital Hospital?
+  beritas  Berita[]
+}
+
+model Event {
+  id        Int      @id @default(autoincrement())
+  type      String
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  idRs      Int
+  fee       Decimal  @db.Decimal(15, 2)
+  kuota     Int
+  desc      String   @db.Text
+  objective String   @db.Text
+  photo     String?
+  createdBy Int
+  createdAt DateTime @default(now())
+
+  hospital Hospital @relation(fields: [idRs], references: [id])
+
+  @@index([idRs])
+  @@index([createdBy])
+}
+
+model Hospital {
+  id                   Int    @id @default(autoincrement())
+  userId               Int    @unique
+  namaRumahSakit       String
+  jenisRumahSakit      String
+  kelasTipe            String
+  statusKepemilikan    String
+  nomorIzinOperasional String @unique
+
+  alamatLengkap String
+  provinsi      String
+  kabupatenKota String
+  kecamatan     String
+  desaKelurahan String
+
+  nomorTelepon String
+  emailResmi   String @unique
+  namaPIC      String
+  emailPIC     String
+  password     String
+
+  dokumenIzinOperasional String
+  persetujuan            Boolean
+
+  statusVerifikasi StatusVerifikasi @default(MENUNGGU)
+  event            Event[]
+  user             User             @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Berita {
+  id           Int      @id @default(autoincrement())
+  title        String
+  category     String
+  author       String
+  content      String   @db.Text
+  photo        String?
+  photoCaption String?
+  editorNote   String?  @db.Text
+  publishedAt  DateTime @default(now())
+  createdBy    Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  creator User @relation(fields: [createdBy], references: [id])
+
+  @@index([category])
+  @@index([publishedAt])
+  @@index([createdBy])
+}
+
+enum StatusVerifikasi {
+  MENUNGGU
+  DISETUJUI
+  DITOLAK
+}
