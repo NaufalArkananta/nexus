@@ -85,21 +85,24 @@ model Hospital {
 }
 
 model Berita {
-  id           Int      @id @default(autoincrement())
+  id           Int          @id @default(autoincrement())
   title        String
   category     String
   author       String
-  content      String   @db.Text
+  content      String       @db.Text
   photo        String?
   photoCaption String?
-  editorNote   String?  @db.Text
-  publishedAt  DateTime @default(now())
+  editorNote   String?      @db.Text
+  publishedAt  DateTime     @default(now())
   createdBy    Int
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  status       StatusBerita @default(DRAF)
+  readMinutes  Int?
 
   creator User @relation(fields: [createdBy], references: [id])
 
+  @@index([status])
   @@index([category])
   @@index([publishedAt])
   @@index([createdBy])
@@ -109,4 +112,9 @@ enum StatusVerifikasi {
   MENUNGGU
   DISETUJUI
   DITOLAK
+}
+
+enum StatusBerita {
+  DRAF
+  TERBIT
 }

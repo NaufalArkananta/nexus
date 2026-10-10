@@ -53,3 +53,5 @@ generated
 
 #upload
 public/uploads/izin-operasional/*.pdf
+public/uploads/berita/
+public/uploads/event/
