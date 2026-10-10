@@ -13,10 +13,10 @@ datasource db {
 }
 
 model User {
-  id            Int      @id @default(autoincrement())
+  id            Int       @id @default(autoincrement())
   nama          String
-  noHp          String   @unique
-  email         String   @unique
+  noHp          String    @unique
+  email         String    @unique
   password      String
   provinsi      String
   kabupatenKota String
@@ -24,13 +24,11 @@ model User {
   desaKelurahan String
   alamat        String?
   kodePos       String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   golDarah      String
-}
-
-  hospital Hospital?
-  beritas  Berita[]
+  hospital      Hospital?
+  beritas       Berita[]
 }
 
 model Event {

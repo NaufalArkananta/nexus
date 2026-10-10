@@ -6,7 +6,7 @@
 
 */
 -- AlterTable
-ALTER TABLE `hospital` ADD COLUMN `userId` INTEGER NOT NULL;
+ALTER TABLE `Hospital` ADD COLUMN `userId` INTEGER NOT NULL;
 
 -- CreateIndex
 CREATE UNIQUE INDEX `Hospital_userId_key` ON `Hospital`(`userId`);

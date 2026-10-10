@@ -29,7 +29,7 @@ export default function LoginPage() {
       const response = await axiosInstance.post("/api/auth/login", payload);
 
       setTimeout(() => {
-        router.replace("/");
+        router.replace("/home");
       }, 1200);
     } catch (error: any) {
       if (error.response && error.response.data) {

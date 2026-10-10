@@ -1,5 +1,5 @@
 -- AlterTable
-ALTER TABLE `berita` ADD COLUMN `readMinutes` INTEGER NULL,
+ALTER TABLE `Berita` ADD COLUMN `readMinutes` INTEGER NULL,
     ADD COLUMN `status` ENUM('DRAF', 'TERBIT') NOT NULL DEFAULT 'DRAF';
 
 -- CreateIndex

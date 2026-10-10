@@ -7,6 +7,6 @@
 
 */
 -- AlterTable
-ALTER TABLE `hospital` ADD COLUMN `desaKelurahan` VARCHAR(191) NOT NULL,
+ALTER TABLE `Hospital` ADD COLUMN `desaKelurahan` VARCHAR(191) NOT NULL,
     ADD COLUMN `kecamatan` VARCHAR(191) NOT NULL,
     ADD COLUMN `provinsi` VARCHAR(191) NOT NULL;
