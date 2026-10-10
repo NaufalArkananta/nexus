@@ -129,6 +129,27 @@ export async function PUT(request: NextRequest, { params }: Params) {
       updateData.publishedAt = date;
     }
 
+    const statusRaw = text("status");
+
+    if (statusRaw !== undefined) {
+      if (statusRaw !== "DRAF" && statusRaw !== "TERBIT") {
+        return fail("status harus DRAF atau TERBIT", 400);
+      }
+      updateData.status = statusRaw;
+    }
+
+    const readMinutesRaw = text("read_minutes");
+
+    if (readMinutesRaw !== undefined) {
+      const value = Number(readMinutesRaw);
+
+      if (readMinutesRaw && (!Number.isInteger(value) || value < 1)) {
+        return fail("read_minutes harus berupa angka bulat positif", 400);
+      }
+
+      updateData.readMinutes = readMinutesRaw ? value : null;
+    }
+
     // Upload foto baru (kalau ada)
     newPhotoPath = await savePhoto(formData.get("photo"), "berita");
 
